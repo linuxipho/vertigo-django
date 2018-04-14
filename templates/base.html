@@ -1,0 +1,77 @@
+{% load static %}
+
+<!DOCTYPE html>
+<html lang="fr">
+
+<head>
+    <!-- Required meta tags -->
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+
+    <!-- Site meta tags and more -->
+    <meta name="description" content="Application web de gestion du matériel pour l'association d'escalade et canyoning Vertigo à Montpellier." />
+    <meta name="author" content="Rémi de Chazelles">
+    <link rel="shortcut icon" type="image/png" href="{% static 'favicon.ico' %}"/>
+    <title>Liste des {{ current_type.plural }} | Vertigo</title>
+
+    <!-- Bootstrap CSS -->
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css" integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
+    <link rel="stylesheet" type="text/css" href="{% static 'css/style.css' %}" />
+</head>
+
+<body>
+
+    <nav class="navbar navbar-expand-md navbar-dark bg-danger fixed-top">
+        <a class="navbar-brand" href="">Liste des {{ current_type.plural }}</a>
+        <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Basculer la navigation">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+
+        <div class="collapse navbar-collapse" id="navbarSupportedContent">
+            <ul class="navbar-nav mr-auto">
+
+            {% for type in types %}
+                <li class="nav-item{% if type.ref == current_type.ref %} active{% endif %}">
+                    <a class="nav-link" href="{% url 'list_url' type.ref %}">{{ type.plural|title }}</a>
+                </li>
+            {% endfor %}
+
+            </ul>
+            <ul class="navbar-nav">
+                {% if user.get_short_name %}
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle" href="http://example.com" id="dropdown02" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">{{ user.get_short_name }}</a>
+                        <div class="dropdown-menu dropdown-menu-right" aria-labelledby="dropdown02">
+                            {% if perms.app.add_equipment %}
+                                <h6 class="dropdown-header">Membre du bureau</h6>
+                                <a class="dropdown-item" href="https://cloud.vertigo-montpellier.fr">VertiCloud</a>
+                                <a class="dropdown-item" href="">Administration</a>  {% comment %}{% url 'admin:index' %}{% endcomment %}
+                                <div class="dropdown-divider"></div>
+                            {% endif %}
+                            <a class="dropdown-item" href="">Déconnexion</a>  {% comment %}{% url 'logout' %}{% endcomment %}
+                        </div>
+                    </li>
+                {% else %}
+                    <li class="nav-item">
+                        {# <a class="nav-link active" href="">Connexion</a>  {% comment %}{% url 'login' %}{% endcomment %} #}
+                        <button type="button" class="btn btn-outline-light">Connexion</button>
+                    </li>
+                {% endif %}
+            </ul>
+        </div>
+    </nav>
+
+    <div class="container">
+        {% block content %}{% endblock %}
+    </div>
+
+    <!-- footer -->
+    <img src="{% static '/img/logo.png' %}" class="mx-auto d-block top-margin" alt="Logo Vertigo" height="64">
+    <p class="text-center discret top-padding-sm"><small>VertigoDjango 0.1.0</small></p>
+
+    <script src="https://code.jquery.com/jquery-3.2.1.slim.min.js" integrity="sha384-KJ3o2DKtIkvYIK3UENzmM7KCkRr/rE9/Qpg6aAZGJwFDMVNA/GpGFF93hXpG5KkN" crossorigin="anonymous"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js" integrity="sha384-ApNbgh9B+Y1QKtv3Rn7W3mgPxhU9K/ScQsAP7hUibX39j7fakFPskvXusvfa0b4Q" crossorigin="anonymous"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js" integrity="sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl" crossorigin="anonymous"></script>
+
+</body>
+</html>

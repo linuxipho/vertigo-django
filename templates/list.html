@@ -1,0 +1,30 @@
+{% extends 'base.html' %}
+
+{% block content %}
+
+    {% if data %}
+        <table class="table table-striped white-bg opaque">
+            <thead>
+                <tr>
+                    <th>n°</th>
+                    <th>Responsable</th>
+                    <th>Depuis&nbsp;le</th>
+                </tr>
+            </thead>
+            <tbody>
+            {% for row in data %}
+                <tr>
+                    <td><span class="badge badge-pill badge-{{ row.color }}">{{ row.item.ref }}</span></td>
+                    <td><a href="">{{ row.user|default_if_none:"---" }}</a></td>
+                    <td class="td-center">{{ row.date|date:"j N" }}</td>
+                </tr>
+            {% endfor %}
+
+{#            {% url 'borrowing_url' row.item.verbose_url row.item_id %}#}
+            </tbody>
+        </table>
+    {% else %}
+        <div class="alert alert-warning first-element" role="alert">Il n'y a pas encore d'emprunt enregistré...</div>
+    {% endif %}
+
+{% endblock %}
