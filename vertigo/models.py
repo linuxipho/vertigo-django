@@ -29,7 +29,7 @@ class Profile(models.Model):
     birth_date = models.DateField('date de naissance', null=True, blank=True)
     medical_date = models.DateField('date du certificat', null=True, blank=True)
     medical_file = models.FileField('certificat médical', upload_to='medical_certs/%Y/', null=True, blank=True)
-    responsibility = models.BooleanField('accord de responsabilité', default=False)
+    agreement = models.BooleanField('accord de responsabilité', default=False)
     forbidden = models.BooleanField('interdit d\'emprunt', default=False)
 
     def formatted_phone(self):
@@ -48,7 +48,7 @@ class EquipmentType:
     def __init__(self, singular, plural):
         self.singular = singular
         self.plural = plural
-        self.ref = slugify(plural)
+        self.url = slugify(plural)
 
 
 class Equipment(models.Model):
@@ -72,7 +72,7 @@ class Equipment(models.Model):
     # for item in TYPE_LIST:
     #     TYPES[item.ref] = {'singular': item.singular, 'plural': item.plural}
 
-    TYPE_CHOICE = [(equipment.ref, equipment.singular) for equipment in TYPE_LIST]
+    TYPE_CHOICE = [(equipment.url, equipment.singular) for equipment in TYPE_LIST]
 
     YEAR_CHOICE = []
     now = timezone.now().year
@@ -81,7 +81,7 @@ class Equipment(models.Model):
 
     ref = models.IntegerField(
         'numéro', help_text='le numéro donné par l\'association', blank=True, null=True, db_index=True)
-    type = models.CharField('type', max_length=20, choices=TYPE_CHOICE, default=ROPE.ref)
+    type = models.CharField('type', max_length=20, choices=TYPE_CHOICE, default=ROPE.url)
     status = models.BooleanField('en usage', help_text='décocher si réformé', default=True, db_index=True)
 
     brand = models.CharField('marque', max_length=50, blank=True)

@@ -1,9 +1,11 @@
 {% extends 'base.html' %}
-{#{% load static %}#}
 
-{% block content %}
-    <div class="container with-padding">
-        <form class="first-element" action="{% url 'borrowing_url' url_type equipment_id %}" method="post">
+{% block page_title %}Emprunt {{ current_type.singular }} n°{{ equipment_ref }}{% endblock %}
+{% block navbar_title %}{{ current_type.singular|capfirst }} n°{{ equipment_ref }}{% endblock %}
+
+{% block container %}
+    <div class="container px-3">
+        <form class="mt-3" action="{% url 'borrowing_url' current_type.url equipment_id %}" method="post">
 
             {% csrf_token %}
 
