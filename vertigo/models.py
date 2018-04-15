@@ -37,9 +37,6 @@ class Profile(models.Model):
             return phonenumbers.format_number(self.phone, phonenumbers.PhoneNumberFormat.NATIONAL)
     formatted_phone.short_description = 'téléphone'
 
-    def __str__(self):
-        return self.user.first_name
-
 
 class EquipmentType:
     """
@@ -172,3 +169,11 @@ class EquipmentBorrowing(models.Model):
         elif d < 21:
             color = 'danger'
         return color
+
+
+# Hack to display user full name in forms select field
+def override_user_str(self):
+    return "{} {}".format(self.first_name, self.last_name)
+
+
+User.__str__ = override_user_str

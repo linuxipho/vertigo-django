@@ -7,6 +7,8 @@ from .models import EquipmentBorrowing
 
 class EquipmentBorrowingForm(ModelForm):
 
+    # user = ModelChoiceField(queryset=User.objects.all())
+
     def clean(self):
         cleaned_data = super(EquipmentBorrowingForm, self).clean()
         date = cleaned_data.get("date")
