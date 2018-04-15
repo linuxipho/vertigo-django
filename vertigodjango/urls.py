@@ -22,5 +22,6 @@ from vertigo.models import Equipment
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('<slug:url_type>/', views.list_page, name='list_url'),
+    path('<slug:url_type>/emprunt/<int:equipment_id>', views.borrowing_page, name='borrowing_url'),
     path('', views.list_page, {'url_type': Equipment.ROPE.ref}),  # Default page
 ]

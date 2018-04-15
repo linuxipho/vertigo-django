@@ -3,7 +3,9 @@
 {% block content %}
 
     {% if data %}
-        <table class="table table-striped white-bg opaque">
+
+    <div class="container without-padding">
+        <table class="table table-striped table-hover white-bg opaque ">
             <thead>
                 <tr>
                     <th>n°</th>
@@ -13,18 +15,32 @@
             </thead>
             <tbody>
             {% for row in data %}
-                <tr>
+                <tr class='clickable-row' data-url="{% url 'borrowing_url' current_type.ref row.item_id %}">
                     <td><span class="badge badge-pill badge-{{ row.color }}">{{ row.item.ref }}</span></td>
-                    <td><a href="">{{ row.user|default_if_none:"---" }}</a></td>
+{#                    <td><a href="{% url 'borrowing_url' current_type.ref row.item_id %}">{{ row.user.get_full_name|default_if_none:"---" }}</a></td>#}
+                    <td>{{ row.user.get_full_name|default_if_none:"---" }}</td>
+
                     <td class="td-center">{{ row.date|date:"j N" }}</td>
                 </tr>
             {% endfor %}
-
-{#            {% url 'borrowing_url' row.item.verbose_url row.item_id %}#}
             </tbody>
         </table>
+    </div>
+
     {% else %}
-        <div class="alert alert-warning first-element" role="alert">Il n'y a pas encore d'emprunt enregistré...</div>
+
+    <div class="container with-padding">
+        <div class="alert alert-primary first-element" role="alert">Il n'y a pas encore d'emprunt enregistré...</div>
+    </div>
+
     {% endif %}
+
+    <script>
+        jQuery(document).ready(function($) {
+            $('.clickable-row').click(function() {
+                window.location = $(this).data('url');
+            });
+        });
+    </script>
 
 {% endblock %}

@@ -1,9 +1,9 @@
 {% extends 'base.html' %}
-{% load static %}
+{#{% load static %}#}
 
 {% block content %}
-    <div class="form-container">
-        <form class="margin-10" action="{% url 'borrowing_url' type_slug equipment_id %}" method="post">
+    <div class="container with-padding">
+        <form class="first-element" action="{% url 'borrowing_url' url_type equipment_id %}" method="post">
 
             {% csrf_token %}
 
@@ -15,17 +15,17 @@
                     {{ field.errors }}
                 </div>
             {% endfor %}
+
             <div class="row">
                 <div class="col">
-                    <button class="btn btn-lg btn-light btn-block" type="button" id="cancel">Annuler</button>
+                    <a class="btn btn-lg btn-light btn-block" type="button" id="cancel" href="{{request.META.HTTP_REFERER}}">Annuler</a>
                 </div>
                 <div class="col">
                     <button class="btn btn-lg btn-danger btn-block" type="submit">Valider</button>
                 </div>
             </div>
+
         </form>
     </div>
-
-    <script src="{% static 'js/cancel.js' %}"></script>
 
 {% endblock %}

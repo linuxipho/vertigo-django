@@ -1,7 +1,16 @@
 .container {
-    padding: 3.5em 0;
     max-width: 844px;
+}
+.without-padding{
+    padding: 3.5em 0;
+}
+.with-padding {
+    padding: 3.5em 1em;
 }
 .first-element {
     margin-top: 1em;
+}
+.table th {
+    /* Overrides Bootstrap table header top border */
+    border-top: 0;
 }
