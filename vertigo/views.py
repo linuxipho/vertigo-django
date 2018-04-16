@@ -1,11 +1,15 @@
-from django.forms import ModelChoiceField
+from django.contrib.auth.decorators import permission_required, login_required
 from django.shortcuts import render, redirect
 from django.contrib.auth.models import User
+from django.contrib.auth import logout
+from django.contrib import messages
+from django.utils.safestring import mark_safe
 
 from .models import Equipment, EquipmentBorrowing
 from .forms import EquipmentBorrowingForm
 
 
+@permission_required('vertigo.add_equipmentborrowing')
 def list_page(request, url_type):
 
     # Verify tha user agreed to borrowing policy
@@ -27,6 +31,7 @@ def list_page(request, url_type):
         return redirect('agreement_url', url_type=url_type)  # , next=request.path
 
 
+@permission_required('vertigo.add_equipmentborrowing')
 def borrowing_page(request, url_type, equipment_id):
 
     equipment = [obj for obj in Equipment.TYPE_LIST if obj.url == url_type][0]
@@ -62,6 +67,7 @@ def borrowing_page(request, url_type, equipment_id):
     return render(request, 'borrowing.html', context)
 
 
+@permission_required('vertigo.add_equipmentborrowing')
 def agreement_page(request, url_type):
 
     if request.POST and request.user:
@@ -75,3 +81,12 @@ def agreement_page(request, url_type):
             'url_type': url_type
         }
         return render(request, 'agreement.html', context)
+
+
+def logout_page(request):
+    if request.user.is_authenticated:
+        messages.success(
+            request, mark_safe("A bientôt <span class=\"font-weight-bold\">{}</span> !Tu as bien été déconnecté."
+                               .format(request.user.first_name)))
+        logout(request)
+    return render(request, 'login.html')

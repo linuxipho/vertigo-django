@@ -14,17 +14,20 @@ Including another URLconf
     2. Add a URL to urlpatterns:  path('blog/', include('blog.urls'))
 """
 from django.contrib import admin
+from django.contrib.auth import views as auth_views
 from django.urls import path
 
 from vertigo import views
 from vertigo.models import Equipment
 
 urlpatterns = [
+    path('login/', auth_views.login, {'template_name': 'login.html'}, name='login'),
+    path('logout/', views.logout_page, name='logout'),
     path('admin/', admin.site.urls),
     path('<slug:url_type>/accord/', views.agreement_page, name='agreement_url'),
 
     path('<slug:url_type>/', views.list_page, name='list_url'),
     path('<slug:url_type>/emprunt/id-<int:equipment_id>', views.borrowing_page, name='borrowing_url'),
 
-    path('', views.list_page, {'url_type': Equipment.ROPE.url}),  # Default page
+    path('', views.list_page, {'url_type': Equipment.ROPE.url}, name='default'),  # Default page
 ]

@@ -1,0 +1,63 @@
+{% load static %}
+
+<!DOCTYPE html>
+<html lang="fr" class="height: 100%">
+
+<head>
+    <!-- Required meta tags -->
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+
+    <!-- Site meta tags and more -->
+    <meta name="description" content="Application web de gestion du matériel pour l'association d'escalade et canyoning Vertigo à Montpellier." />
+    <meta name="author" content="Rémi de Chazelles">
+    <link rel="shortcut icon" type="image/png" href="{% static 'favicon.ico' %}"/>
+    <title>Gestion du matériel | Vertigo</title>
+
+    <!-- Bootstrap CSS -->
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.1.0/css/bootstrap.min.css" integrity="sha384-9gVQ4dYFwwWSjIDZnLEWnxCjeSWFphJiwGPXr1jddIhOegiu1FwO5qRGvFXOdJZ4" crossorigin="anonymous">    <link rel="stylesheet" type="text/css" href="{% static 'css/style.css' %}" />
+
+</head>
+
+<body class="form-body text-center">
+
+    <form class="form-signin" method="POST" action="{% url 'login' %}">
+
+        {% csrf_token %}
+
+        {% for message in messages %}
+            <div class="alert {{ message.tags }} alert-dismissible mb-4 text-left" role="alert">
+                <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+                {{ message }}
+            </div>
+        {% endfor %}
+
+        <img class="mx-auto d-block mb-4" src="{% static '/img/logo.png' %}" alt="Logo Vertigo" height="64">
+
+        {% if form.errors %}
+            <div class="alert alert-danger alert-dismissible" role="alert">
+                <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+                <span class="font-weight-bold">Erreur :</span> identifiant ou mot de passe invalide...
+            </div>
+        {% endif %}
+
+        <h1 class="h4 mb-2 font-weight-normal">Gestion du matériel</h1>
+        <input type="hidden" name="next" value="{{ next }}" />
+        <label for="id_username" class="sr-only">Nom d'utilisateur</label>
+        <input type="text" id="id_username" name="username" class="form-control" placeholder="Login" required>
+        <label for="id_password" class="sr-only">Mot de passe</label>
+        <input type="password" id="id_password" name="password" class="form-control" placeholder="Mot de passe" required>
+        <button class="btn btn-lg btn-danger btn-block mt-4 red-vertigo" type="submit">Connexion</button>
+    </form>
+
+    <!-- JS libs -->
+    <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js" integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo" crossorigin="anonymous"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.0/umd/popper.min.js" integrity="sha384-cs/chFZiN24E4KMATLdqdvsezGxaGsi4hLGOzlXwp5UZB1LY//20VyM2taTB4QvJ" crossorigin="anonymous"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.1.0/js/bootstrap.min.js" integrity="sha384-uefMccjFJAIv6A+rW+L4AHf99KvxDjWSu1z9VI8SKNVmz4sk7buKt/6v9KI65qnm" crossorigin="anonymous"></script>
+
+</body>
+</html>

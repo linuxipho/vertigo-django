@@ -20,7 +20,6 @@
             {% for row in data %}
                 <tr class='clickable-row' data-url="{% url 'borrowing_url' current_type.url row.item_id %}">
                     <td><span class="badge badge-pill badge-{{ row.color }}">{{ row.item.ref }}</span></td>
-{#                    <td><a href="{% url 'borrowing_url' current_type.ref row.item_id %}">{{ row.user.get_full_name|default_if_none:"---" }}</a></td>#}
                     <td>{{ row.user.get_full_name|default_if_none:"---" }}</td>
 
                     <td class="td-center">{{ row.date|date:"j N" }}</td>
@@ -38,6 +37,9 @@
 
     {% endif %}
 
+{% endblock %}
+
+{% block script %}
     <script>
         jQuery(document).ready(function($) {
             $('.clickable-row').click(function() {
@@ -45,5 +47,4 @@
             });
         });
     </script>
-
 {% endblock %}
