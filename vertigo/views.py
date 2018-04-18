@@ -86,7 +86,7 @@ def agreement_page(request, url_type):
 def logout_page(request):
     if request.user.is_authenticated:
         messages.success(
-            request, mark_safe("A bientôt <span class=\"font-weight-bold\">{}</span> !Tu as bien été déconnecté."
+            request, mark_safe("A bientôt <span class=\"font-weight-bold\">{}</span> ! Tu as bien été déconnecté."
                                .format(request.user.first_name)))
         logout(request)
     return render(request, 'login.html')

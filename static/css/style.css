@@ -1,3 +1,6 @@
+.red-vertigo {
+    background-color: #C93F3F;
+}
 .container {
     padding: 3.5em 0;
     max-width: 844px;
@@ -5,9 +8,6 @@
 .table th {
     /* Overrides Bootstrap table header top border */
     border-top: 0;
-}
-.red-vertigo {
-    background-color: #C93F3F;
 }
 .form-body {
     height: 100%;
@@ -19,7 +19,6 @@
     padding-bottom: 40px;
     background-color: #f5f5f5;
 }
-
 .form-signin {
     width: 100%;
     max-width: 330px;
