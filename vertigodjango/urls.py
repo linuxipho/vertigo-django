@@ -24,6 +24,7 @@ urlpatterns = [
     path('login/', auth_views.login, {'template_name': 'login.html'}, name='login'),
     path('logout/', views.logout_page, name='logout'),
     path('admin/', admin.site.urls),
+    path('export/', views.export_pdf, name="export"),
     path('<slug:url_type>/accord/', views.agreement_page, name='agreement_url'),
 
     path('<slug:url_type>/', views.list_page, name='list_url'),

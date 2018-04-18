@@ -7,6 +7,7 @@ from django.utils.safestring import mark_safe
 
 from .models import Equipment, EquipmentBorrowing
 from .forms import EquipmentBorrowingForm
+from .exports import ExportMaterial
 
 
 @permission_required('vertigo.add_equipmentborrowing')
@@ -90,3 +91,10 @@ def logout_page(request):
                                .format(request.user.first_name)))
         logout(request)
     return render(request, 'login.html')
+
+
+def export_pdf(request):
+    if request.user.is_authenticated:
+
+        response = ExportMaterial()
+        return response.pdf_material()
