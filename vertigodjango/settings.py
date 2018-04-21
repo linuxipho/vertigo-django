@@ -137,3 +137,15 @@ STATIC_ROOT = os.path.join(BASE_DIR, "../www/static")
 STATICFILES_DIRS = [
     os.path.join(BASE_DIR, "static"),
 ]
+
+# Email config
+SEND_EMAIL = config('SEND_EMAIL', default=False, cast=bool)
+DEFAULT_FROM_EMAIL = config('DEFAULT_FROM_EMAIL', 'John Doe <john@doe.com>')
+EMAIL_SUBJECT_PREFIX = config('EMAIL_SUBJECT_PREFIX', '[Email subject prefix]')
+
+# SMTP config
+EMAIL_HOST = config('EMAIL_HOST')
+EMAIL_PORT = config('EMAIL_PORT')
+EMAIL_HOST_USER = config('EMAIL_HOST_USER')
+EMAIL_HOST_PASSWORD = config('EMAIL_HOST_PASSWORD')
+EMAIL_USE_TLS = config('EMAIL_USE_TLS', default=True, cast=bool),

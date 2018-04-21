@@ -42,10 +42,11 @@ class EquipmentType:
     """
         Simple class to handle Equipment type conjugation and reference
     """
-    def __init__(self, singular, plural):
+    def __init__(self, singular, plural, gender):
         self.singular = singular
         self.plural = plural
         self.url = slugify(plural)
+        self.gender = gender
 
 
 class Equipment(models.Model):
@@ -55,13 +56,13 @@ class Equipment(models.Model):
 
     # Do not modify after database is initialized, only append to the end
     # TODO: add localization if needed
-    ROPE = EquipmentType('corde', 'cordes')
-    RAPPEL = EquipmentType('rappel', 'rappels')
-    QUICKDRAW = EquipmentType('dégaines', 'dégaines')
-    LANYARD = EquipmentType('longe', 'longes')
-    HARNESS = EquipmentType('baudrier', 'baudriers')
-    HELMET = EquipmentType('casque', 'casques')
-    CRASHPAD = EquipmentType('crashpad', 'crashpads')
+    ROPE = EquipmentType('corde', 'cordes', 'la')
+    RAPPEL = EquipmentType('rappel', 'rappels', 'le')
+    QUICKDRAW = EquipmentType('dégaines', 'dégaines', 'les')
+    LANYARD = EquipmentType('longe', 'longes', 'la')
+    HARNESS = EquipmentType('baudrier', 'baudriers', 'le')
+    HELMET = EquipmentType('casque', 'casques', 'le')
+    CRASHPAD = EquipmentType('crashpad', 'crashpads', 'le')
 
     TYPE_LIST = [ROPE, RAPPEL, QUICKDRAW, LANYARD, HARNESS, HELMET, CRASHPAD]  # Must be exact number as above
 
@@ -99,7 +100,7 @@ class Equipment(models.Model):
         ordering = ('-status', 'type', 'ref')
 
     def __str__(self):
-        message = self.caution if self.caution else ''
+        message = " ({})".format(self.caution) if self.caution else ''
         return '{type} n°{ref}{caution}'.format(type=self.get_type_display(), ref=self.ref, caution=message)
 
     def clean(self):

@@ -4,16 +4,58 @@ from django.contrib.auth.models import User
 from django.contrib.auth import logout
 from django.contrib import messages
 from django.utils.safestring import mark_safe
+from django.conf import settings
+from django.core.mail import EmailMultiAlternatives
+from email.mime.image import MIMEImage
+
+import os
 
 from .models import Equipment, EquipmentBorrowing
 from .forms import EquipmentBorrowingForm
 from .exports import ExportMaterial
 
 
+def send_email(user, item, gender):
+    """Methode called to send email to new borrower
+    :param user: the User class instance
+    :param item: the Equipment class instance
+    :param gender: the current equipment gender
+    """
+    if settings.SEND_EMAIL:  # and not request.user.is_authenticated:
+        subject = "{prefix} Emprunt {item}".format(prefix=settings.EMAIL_SUBJECT_PREFIX, item=item)
+        from_email = settings.DEFAULT_FROM_EMAIL
+        to = [user.email]
+        text_content = """
+                            Salut {user}, tu as emprunté {article} {item}.
+                            Tu en es responsable pendant une semaine, jusqu'à son retour
+                            entre les mains du référent matériel jeudi prochain.
+                            """.format(user=user.first_name, article=gender, item=item)
+        html_content = """
+                            <p>Salut {user},</p>
+                            <p>Tu as emprunté {article} <strong>{item}</strong>.<br \>
+                            Tu en es responsable pendant une semaine,
+                            jusqu'à son retour entre les mains du référent matériel <strong>jeudi prochain</strong>.</p>
+                            <p>Bonne grimpe !</p>
+                            <p>- - -</p>
+                            <img src="cid:logo.png">
+                            """.format(user=user.first_name, article=gender, item=item)
+        msg = EmailMultiAlternatives(subject, text_content, from_email, to)
+        msg.attach_alternative(html_content, "text/html")
+        msg.mixed_subtype = 'related'
+
+        with open(os.path.join(settings.STATICFILES_DIRS[0], 'img/logo_mail.png'), 'rb') as img:
+            msg_image = MIMEImage(img.read())
+
+        msg_image.add_header('Content-ID', '<logo.png>')
+        msg.attach(msg_image)
+
+        msg.send()
+
+
 @permission_required('vertigo.add_equipmentborrowing')
 def list_page(request, url_type):
 
-    # Verify tha user agreed to borrowing policy
+    # Verify the user agreed to borrowing policy
     if request.user.profile.agreement:
 
         equipment = [obj for obj in Equipment.TYPE_LIST if obj.url == url_type][0]
@@ -49,6 +91,10 @@ def borrowing_page(request, url_type, equipment_id):
             user = form.cleaned_data['user']
             date = form.cleaned_data['date']
             EquipmentBorrowing.objects.create(item=item, user=user, date=date)
+
+            send_email(user, item, equipment.gender)
+
+            messages.success(request, "Le nouvel emprunt a bien été enregistré.")
 
             return redirect('list_url', url_type=url_type)
 
