@@ -11,6 +11,12 @@
     <!-- Site meta tags and more -->
     <meta name="description" content="Application web de gestion du matériel pour l'association d'escalade et canyoning Vertigo à Montpellier." />
     <meta name="author" content="Rémi de Chazelles">
+    <!-- Chrome, Firefox OS and Opera -->
+    <meta name="theme-color" content="#C93F3F">
+    <!-- Windows Phone -->
+    <meta name="msapplication-navbutton-color" content="#C93F3F">
+    <!-- iOS Safari -->
+    <meta name="apple-mobile-web-app-status-bar-style" content="#C93F3F">
     <link rel="shortcut icon" type="image/png" href="{% static 'favicon.ico' %}"/>
     <title>{% block page_title %}{% endblock %} | Vertigo</title>
 
@@ -53,8 +59,10 @@
         {% block container %}{% endblock %}
 
     <!-- footer -->
+    <div class="text-center">
     <img src="{% static '/img/logo.png' %}" class="mx-auto d-block top-margin" alt="Logo Vertigo" height="64">
-    <p class="text-center discret top-padding-sm"><small>VertigoDjango 0.1.0</small></p>
+        <p class="discret top-padding-sm"><small>VertigoDjango 0.1.0{% if perms.vertigo.add_equipment %} - <a href="{% url 'admin:index' %}">Administration</a></small>{% endif %}</p>
+    </div>
 
     <!-- JS libs -->
     <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js" integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo" crossorigin="anonymous"></script>

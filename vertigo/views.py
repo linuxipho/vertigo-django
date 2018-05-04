@@ -4,6 +4,7 @@ from django.contrib.auth.models import User
 from django.contrib.auth import logout
 from django.contrib import messages
 from django.utils.safestring import mark_safe
+from django.utils import timezone
 from django.conf import settings
 from django.core.mail import EmailMultiAlternatives
 from email.mime.image import MIMEImage
@@ -77,38 +78,39 @@ def list_page(request, url_type):
 @permission_required('vertigo.add_equipmentborrowing')
 def borrowing_page(request, url_type, equipment_id):
 
-    equipment = [obj for obj in Equipment.TYPE_LIST if obj.url == url_type][0]
-
     # request.META.get('HTTP_REFERER')
-
+    equipment = [obj for obj in Equipment.TYPE_LIST if obj.url == url_type][0]
     current_obj = Equipment.objects.get(id=equipment_id)
 
     # Process POST request
     if request.POST:
-        form = EquipmentBorrowingForm(request.POST)
-        if form.is_valid():
-            item = current_obj
-            user = form.cleaned_data['user']
-            date = form.cleaned_data['date']
-            EquipmentBorrowing.objects.create(item=item, user=user, date=date)
-
-            send_email(user, item, equipment.gender)
-
-            messages.success(request, "Le nouvel emprunt a bien été enregistré.")
-
+        if not request.POST.get("cancel"):
+            form = EquipmentBorrowingForm(request.POST)
+            if form.is_valid():
+                item = current_obj
+                user = form.cleaned_data['user']
+                date = form.cleaned_data['date']
+                EquipmentBorrowing.objects.create(item=item, user=user, date=date)
+                send_email(user, item, equipment.gender)
+                messages.success(request, "Le nouvel emprunt a bien été enregistré.")
+                return redirect('list_url', url_type=url_type)
+        else:
             return redirect('list_url', url_type=url_type)
 
     # Process GET request as default
-    form = EquipmentBorrowingForm(initial={'item': equipment_id, 'user': request.user.id})
-    equipment_ref = current_obj.ref
-
+    form = EquipmentBorrowingForm(initial={
+        'date': timezone.now().date().strftime('%Y-%m-%d'),
+        'item': equipment_id,
+        'user': request.user.id}
+    )
     form.fields['user'].queryset = User.objects.filter(is_active=True).filter(profile__agreement=True)
+    form.fields['date'].label = "Empruntée le" if equipment.gender == 'la' else "Emprunté le"
 
     context = {
         'form': form,
         'current_type': equipment,
-        'equipment_id': equipment_id,
-        'equipment_ref': equipment_ref,
+        'equipment_id': current_obj.id,
+        'equipment_ref': current_obj.ref,
     }
 
     return render(request, 'borrowing.html', context)

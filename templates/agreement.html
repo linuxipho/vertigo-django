@@ -15,7 +15,7 @@
 
                 <div class="row">
                     <div class="col">
-                        <form action="{{ request.path }}">
+                        <form action="{% url 'logout' %}">
                             <button class="btn btn-lg btn-light btn-block" type="submit">Je refuse</button>
                         </form>
                     </div>

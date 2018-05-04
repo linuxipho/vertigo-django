@@ -20,7 +20,8 @@
 
             <div class="row mt-4">
                 <div class="col">
-                    <a class="btn btn-lg btn-light btn-block" type="button" id="cancel" href="{{request.META.HTTP_REFERER}}">Annuler</a>
+{#                    <a class="btn btn-lg btn-light btn-block" type="button" id="cancel" href="{% url 'list_url' current_type.url %}">Annuler</a>#}
+                    <button class="btn btn-lg btn-light btn-block" type="submit" name="cancel" value="True">Annuler</button>
                 </div>
                 <div class="col">
                     <button class="btn btn-lg btn-outline-success btn-block" type="submit">Valider</button>

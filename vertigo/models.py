@@ -146,7 +146,7 @@ class EquipmentBorrowing(models.Model):
 
     item = models.ForeignKey(Equipment, on_delete=models.PROTECT, verbose_name='équipement')
     user = models.ForeignKey(User, on_delete=models.PROTECT, verbose_name='par', blank=True, null=True)
-    date = models.DateField('emprunté le', default=timezone.now, db_index=True)
+    date = models.DateField('emprunté le', db_index=True)  # default=timezone.now
 
     class Meta:
         verbose_name = 'emprunt'
