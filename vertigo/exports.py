@@ -15,10 +15,10 @@ from reportlab.pdfbase.ttfonts import TTFont
 from .models import EquipmentBorrowing, Equipment
 
 
-COLUMN_1 = 1.5
-COLUMN_2 = 6
-COLUMN_3 = 11.5
-COLUMN_4 = 15
+COLUMN_1 = 1.5 * cm
+COLUMN_2 = 6 * cm
+COLUMN_3 = 11.5 * cm
+COLUMN_4 = 15 * cm
 
 
 class ExportMaterial:
@@ -30,12 +30,12 @@ class ExportMaterial:
         self.page = canvas.Canvas(self.response, pagesize=A4)
         self.page.setLineCap(1)
 
-    def _entete_de_liste(self, equipment_type, bottom):
+    def _entete_de_liste(self, equipment, bottom):
         self.page.setFont('EffraMedium', 10)
-        self.page.drawString(COLUMN_1 * cm, bottom * cm, equipment_type.upper())
-        self.page.drawString(COLUMN_2 * cm, bottom * cm, 'RESPONSABLE')
-        self.page.drawString(COLUMN_3 * cm, bottom * cm, 'DEPUIS LE')
-        self.page.drawString(COLUMN_4 * cm, bottom * cm, 'EMPRUNTE PAR')
+        self.page.drawString(COLUMN_1, bottom * cm, equipment.plural.upper())
+        self.page.drawString(COLUMN_2, bottom * cm, 'RESPONSABLE')
+        self.page.drawString(COLUMN_3, bottom * cm, 'DEPUIS LE')
+        self.page.drawString(COLUMN_4, bottom * cm, 'EMPRUNTÉ{} PAR'.format('E' if equipment.gender == 'la' else ''))
 
     def _pied_de_page(self):
         logo = os.path.join(settings.BASE_DIR, 'static/img/logo.jpg')
@@ -51,7 +51,7 @@ class ExportMaterial:
     def _draw_line(self, y, color, width):
         self.page.setLineWidth(width)
         self.page.setStrokeColor(color)
-        self.page.line(COLUMN_1 * cm, y * cm, 19.5 * cm, y * cm)
+        self.page.line(COLUMN_1, y * cm, 19.5 * cm, y * cm)
 
     def pdf_material(self):
 
@@ -70,10 +70,10 @@ class ExportMaterial:
 
         # Page header
         self.page.setFont('EffraMedium', 20)
-        self.page.drawString(COLUMN_1 * cm, 28 * cm, 'LISTE DU MATERIEL')
+        self.page.drawString(COLUMN_1, 28 * cm, 'LISTE DU MATERIEL')
         self.page.setFont('EffraLight', 10)
-        self.page.drawString(COLUMN_1 * cm, 27.6 * cm, 'Extraction du {}'.format(
-            defaultfilters.date(timezone.now(), 'l j F Y @ H:m')))
+        self.page.drawString(COLUMN_1, 27.6 * cm, 'Export du {}'.format(
+            defaultfilters.date(timezone.now(), 'l j F Y')))  # ' @ H:m'
 
         # Set footer
         self._pied_de_page()
@@ -86,7 +86,7 @@ class ExportMaterial:
             borrowing_list = EquipmentBorrowing.objects.filter(item__type=equipment.url)\
                 .order_by('item__ref', '-date', '-id').distinct('item__ref').exclude(item__status=False)
 
-            self._entete_de_liste(equipment.plural, y)
+            self._entete_de_liste(equipment, y)
             self.page.setFont('EffraLight', 10)
 
             y += -0.5
@@ -94,14 +94,14 @@ class ExportMaterial:
             for borrow in borrowing_list:
                 self._draw_line(y + 0.35, lightgrey, .5)
                 message = " ({})".format(borrow.item.caution) if borrow.item.caution else ''
-                self.page.drawString(COLUMN_1*cm, y*cm, "{} n°{}{}".format(equipment.singular, borrow.item.ref, message))
-                self.page.drawString(COLUMN_2*cm, y*cm, borrow.user.get_full_name())
-                self.page.drawString(COLUMN_3*cm, y*cm, defaultfilters.date(borrow.date, 'j F'))
+                self.page.drawString(COLUMN_1, y*cm, "{} n°{}{}".format(equipment.singular, borrow.item.ref, message))
+                self.page.drawString(COLUMN_2, y*cm, borrow.user.get_full_name())
+                self.page.drawString(COLUMN_3, y*cm, defaultfilters.date(borrow.date, 'j F'))
 
                 y += -0.5
                 if y < 5:
                     self.page.showPage()
-                    self._entete_de_liste(equipment.plural, 28)
+                    self._entete_de_liste(equipment, 28)
                     self._pied_de_page()
                     self.page.setFont('EffraLight', 10)
                     y = 27.5

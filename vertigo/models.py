@@ -17,6 +17,14 @@ def create_or_update_user_profile(sender, instance, created, **kwargs):
     instance.profile.save()
 
 
+# Hack to display user full name in forms select field
+def override_user_str(self):
+    return "{} {}".format(self.first_name, self.last_name)
+
+
+User.__str__ = override_user_str
+
+
 class Profile(models.Model):
     """
         Profil data liked to User model
@@ -143,7 +151,7 @@ class EquipmentBorrowing(models.Model):
     """
     Borrowing model linking an Equipment to a User
     """
-
+    # TODO: related_name
     item = models.ForeignKey(Equipment, on_delete=models.PROTECT, verbose_name='équipement')
     user = models.ForeignKey(User, on_delete=models.PROTECT, verbose_name='par', blank=True, null=True)
     date = models.DateField('emprunté le', db_index=True)  # default=timezone.now
@@ -170,11 +178,3 @@ class EquipmentBorrowing(models.Model):
         elif d < 21:
             color = 'danger'
         return color
-
-
-# Hack to display user full name in forms select field
-def override_user_str(self):
-    return "{} {}".format(self.first_name, self.last_name)
-
-
-User.__str__ = override_user_str
