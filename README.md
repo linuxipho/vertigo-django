@@ -31,3 +31,6 @@ EMAIL_USE_TLS = True
 DEFAULT_FROM_EMAIL = John Doe <john@doe.com>
 EMAIL_SUBJECT_PREFIX = [Subject]
 ```
+
+## Import des adhérents
+Sur le site du CAF, aller dans `Etats` > `Spécifiques club` > `Export données générales adhérent`

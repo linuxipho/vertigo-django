@@ -11,7 +11,7 @@ from phonenumber_field.modelfields import PhoneNumberField
 
 
 @receiver(post_save, sender=User)
-def create_or_update_user_profile(sender, instance, created, **kwargs):
+def create_or_update_profile(sender, instance, created, **kwargs):
     if created:
         Profile.objects.create(user=instance)
     instance.profile.save()
@@ -22,7 +22,7 @@ def override_user_str(self):
     return "{} {}".format(self.first_name, self.last_name)
 
 
-User.__str__ = override_user_str
+User.add_to_class('__str__', override_user_str)
 
 
 class Profile(models.Model):
@@ -30,11 +30,11 @@ class Profile(models.Model):
         Profil data liked to User model
     """
 
-    user = models.OneToOneField(User, on_delete=models.CASCADE)
+    user = models.OneToOneField(User, on_delete=models.CASCADE, related_name="profile")
 
-    license = models.CharField('licence', max_length=12, blank=True)  # 3401 2017 9039
+    license = models.CharField('licence', unique=True, max_length=12)  # 3401 2017 9039 blank=True
     phone = PhoneNumberField('téléphone', null=True, blank=True)
-    birth_date = models.DateField('date de naissance', null=True, blank=True)
+    # birth_date = models.DateField('date de naissance', null=True, blank=True)
     medical_date = models.DateField('date du certificat', null=True, blank=True)
     medical_file = models.FileField('certificat médical', upload_to='medical_certs/%Y/', null=True, blank=True)
     agreement = models.BooleanField('accord de responsabilité', default=False)

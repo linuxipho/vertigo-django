@@ -3,3 +3,4 @@
 __pycache__
 migrations
 static/admin
+export.txt
