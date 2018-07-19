@@ -2,7 +2,7 @@ from django.contrib import admin
 from django.contrib.auth.admin import UserAdmin
 from django.contrib.auth.models import User
 
-from .models import Profile, Equipment, EquipmentBorrowing
+from .models import Profile, Equipment, Topo, EquipmentBorrowing, TopoBorrowing
 
 
 class ProfileInline(admin.StackedInline):
@@ -41,8 +41,24 @@ class EquipmentAdmin(admin.ModelAdmin):
     search_fields = ('ref', 'type')
 
 
+class TopoAdmin(admin.ModelAdmin):
+    model = Topo
+
+    list_display = ('__str__', 'type', 'title', 'ref', 'status')
+    list_filter = ('type', 'status')
+    search_fields = ('ref', 'type')
+
+
 class EquipmentBorrowingAdmin(admin.ModelAdmin):
     model = EquipmentBorrowing
+
+    list_display = ('item', 'user', 'date')
+    list_filter = ('item__type', 'item__status')
+    search_fields = ('item__type', '=item__ref')
+
+
+class TopoBorrowingAdmin(admin.ModelAdmin):
+    model = TopoBorrowing
 
     list_display = ('item', 'user', 'date')
     list_filter = ('item__type', 'item__status')
@@ -52,4 +68,7 @@ class EquipmentBorrowingAdmin(admin.ModelAdmin):
 admin.site.unregister(User)
 admin.site.register(User, CustomUserAdmin)
 admin.site.register(Equipment, EquipmentAdmin)
+admin.site.register(Topo, TopoAdmin)
 admin.site.register(EquipmentBorrowing, EquipmentBorrowingAdmin)
+admin.site.register(TopoBorrowing, TopoBorrowingAdmin)
+

@@ -1,4 +1,5 @@
 from django.contrib.auth.decorators import permission_required, login_required
+from django.http import HttpResponseRedirect
 from django.shortcuts import render, redirect
 from django.contrib.auth.models import User
 from django.contrib.auth import logout
@@ -11,9 +12,10 @@ from email.mime.image import MIMEImage
 
 import os
 
-from .models import Equipment, EquipmentBorrowing
-from .forms import EquipmentBorrowingForm
+from .models import Equipment, Topo, EquipmentBorrowing, TopoBorrowing
+from .forms import UploadFileForm, EquipmentBorrowingForm, TopoBorrowingForm
 from .exports import ExportMaterial
+from .imports import ImportUsers
 
 
 def send_email(user, item, gender):
@@ -37,7 +39,8 @@ def send_email(user, item, gender):
                             Tu en es responsable pendant une semaine,
                             jusqu'à son retour entre les mains du référent matériel <strong>jeudi prochain</strong>.</p>
                             <p>Bonne grimpe !</p>
-                            <p>- - -</p>
+                            <p>- - -<br />
+                            matos.vertigo-montpellier.fr</p>
                             <img src="cid:logo.png">
                             """.format(user=user.first_name, article=gender, item=item)
         msg = EmailMultiAlternatives(subject, text_content, from_email, to)
@@ -59,56 +62,81 @@ def list_page(request, url_type):
     # Verify the user agreed to borrowing policy
     if request.user.profile.agreement:
 
-        equipment = [obj for obj in Equipment.TYPE_LIST if obj.url == url_type][0]
+        context = {'types': Equipment.TYPE_LIST + Topo.TYPE_LIST}
 
-        response = EquipmentBorrowing.objects.filter(item__type=equipment.url).order_by('item__ref', '-date', '-id') \
-            .distinct('item__ref').exclude(item__status=False)
+        if url_type in [item.url for item in Topo.TYPE_LIST]:
+            context['current_type'] = [obj for obj in Topo.TYPE_LIST if obj.url == url_type][0]
+            context['data'] = TopoBorrowing.objects.filter(item__type=context['current_type'].url) \
+                .order_by('item__ref', '-date', '-id').distinct('item__ref').exclude(item__status=False)
+            template = 'list_topo.html'
 
-        context = {
-            'types': Equipment.TYPE_LIST,
-            'current_type': equipment,
-            'data': response
-        }
-        return render(request, 'list.html', context)
+        else:  # elif url_type in [item.url for item in Equipment.TYPE_LIST]:
+            context['current_type'] = [obj for obj in Equipment.TYPE_LIST if obj.url == url_type][0]
+            context['data'] = EquipmentBorrowing.objects.filter(item__type=context['current_type'].url)\
+                .order_by('item__ref', '-date', '-id').distinct('item__ref').exclude(item__status=False)
+            template = 'list.html'
+
+        return render(request, template, context)
 
     else:
         return redirect('agreement_url', url_type=url_type)  # , next=request.path
 
 
-@permission_required('vertigo.add_equipmentborrowing')
-def borrowing_page(request, url_type, equipment_id):
+@permission_required(('vertigo.add_equipmentborrowing', 'vertigo.add_topoborrowing'))
+def borrowing_page(request, url_type, item_id):
+
+    context = {}
 
     # request.META.get('HTTP_REFERER')
-    equipment = [obj for obj in Equipment.TYPE_LIST if obj.url == url_type][0]
-    current_obj = Equipment.objects.get(id=equipment_id)
+    if url_type in [item.url for item in Equipment.TYPE_LIST]:
+        object_type = [obj for obj in Equipment.TYPE_LIST if obj.url == url_type][0]
+        current_obj = Equipment.objects.get(id=item_id)
+    else:
+        object_type = [obj for obj in Topo.TYPE_LIST if obj.url == url_type][0]
+        current_obj = Topo.objects.get(id=item_id)
 
     # Process POST request
     if request.POST:
         if not request.POST.get("cancel"):
-            form = EquipmentBorrowingForm(request.POST)
+
+            if issubclass(type(current_obj), Equipment):
+                form = EquipmentBorrowingForm(request.POST)
+            else:
+                form = TopoBorrowingForm(request.POST)
+
             if form.is_valid():
-                item = current_obj
                 user = form.cleaned_data['user']
                 date = form.cleaned_data['date']
-                EquipmentBorrowing.objects.create(item=item, user=user, date=date)
-                send_email(user, item, equipment.gender)
+
+                if issubclass(type(current_obj), Equipment):
+                    EquipmentBorrowing.objects.create(item=current_obj, user=user, date=date)
+                else:
+                    TopoBorrowing.objects.create(item=current_obj, user=user, date=date)
+
+                send_email(user, current_obj, object_type.gender)
                 messages.success(request, "Le nouvel emprunt a bien été enregistré.")
+
                 return redirect('list_url', url_type=url_type)
         else:
             return redirect('list_url', url_type=url_type)
 
     # Process GET request as default
-    form = EquipmentBorrowingForm(initial={
-        'date': timezone.now().date().strftime('%Y-%m-%d'),
-        'item': equipment_id,
-        'user': request.user.id}
-    )
+
+    if issubclass(type(current_obj), Equipment):
+        form = EquipmentBorrowingForm()
+    else:
+        form = TopoBorrowingForm()
+
+    form.initial = {'date': timezone.now().date().strftime('%Y-%m-%d'),
+                    'item': item_id,
+                    'user': request.user.id}
+
     form.fields['user'].queryset = User.objects.filter(is_active=True).filter(profile__agreement=True)
-    form.fields['date'].label = "Empruntée le" if equipment.gender == 'la' else "Emprunté le"
+    form.fields['date'].label = "Empruntée le" if object_type.gender == 'la' else "Emprunté le"
 
     context = {
         'form': form,
-        'current_type': equipment,
+        'current_type': object_type,
         'equipment_id': current_obj.id,
         'equipment_ref': current_obj.ref,
     }
@@ -146,3 +174,25 @@ def export_pdf(request):
 
         response = ExportMaterial()
         return response.pdf_material()
+
+
+@permission_required('vertigo.add_user')
+def import_page(request):
+
+    if request.POST:
+        print("Form")
+        if not request.POST.get("cancel"):
+            form = UploadFileForm(request.POST, request.FILES)
+            if form.is_valid():
+                print("Process file")
+                import_users = ImportUsers(request.FILES['file'])
+                created = import_users.run()
+                print("{} users created".format(created))
+                messages.success(request, "Le nouvel emprunt a bien été enregistré.")
+                return HttpResponseRedirect('/admin/auth/user/')
+
+        # else:
+        #     return redirect('list_url', url_type=url_type)
+
+    # Process GET request as default
+    return render(request, 'import.html', {'form': UploadFileForm()})

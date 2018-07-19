@@ -2,13 +2,13 @@ from django import forms
 from django.forms import ModelForm
 from django.utils import timezone
 
-from .models import EquipmentBorrowing
+from vertigo.models import EquipmentBorrowing, TopoBorrowing
 
 
-class EquipmentBorrowingForm(ModelForm):
+class BorrowingForm(ModelForm):
 
     def clean(self):
-        cleaned_data = super(EquipmentBorrowingForm, self).clean()
+        cleaned_data = super(BorrowingForm, self).clean()
         date = cleaned_data.get("date")
         print(date)
         print(timezone.now().date())
@@ -19,9 +19,28 @@ class EquipmentBorrowingForm(ModelForm):
         return cleaned_data
 
     class Meta:
-        model = EquipmentBorrowing
         fields = ['date', 'user']
         widgets = {
             'date': forms.DateInput(attrs={'class': 'form-control', 'type': 'date'}),
             'user': forms.Select(attrs={'class': 'form-control'}),
+        }
+
+
+class EquipmentBorrowingForm(BorrowingForm):
+    class Meta(BorrowingForm.Meta):
+        model = EquipmentBorrowing
+
+
+class TopoBorrowingForm(BorrowingForm):
+    class Meta(BorrowingForm.Meta):
+        model = TopoBorrowing
+
+
+class UploadFileForm(forms.Form):
+
+    file = forms.FileField(label='Fichier \'export.txt\'')
+
+    class Meta:
+        widgets = {
+            'file': forms.FileInput(attrs={'class': 'form-control-file'}),
         }

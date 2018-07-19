@@ -4,6 +4,7 @@ from django.contrib.auth.models import User
 from django.core.exceptions import ValidationError
 from django.dispatch import receiver
 from django.utils import timezone
+from django.utils.safestring import mark_safe
 from django.utils.text import slugify
 
 import phonenumbers
@@ -147,22 +148,46 @@ class Equipment(models.Model):
                     {'ref': 'un·e {} en cours d\'usage existe déjà avec ce numéro'.format(self.get_type_display())})
 
 
-class EquipmentBorrowing(models.Model):
-    """
-    Borrowing model linking an Equipment to a User
-    """
-    # TODO: related_name
-    item = models.ForeignKey(Equipment, on_delete=models.PROTECT, verbose_name='équipement')
+class Topo(models.Model):
+
+    TOPO = EquipmentType('topo', 'topos', 'le')
+    MAP = EquipmentType('carte', 'cartes', 'la')
+    TYPE_LIST = [TOPO, MAP]
+
+    TYPE_CHOICE = [(topo.url, topo.singular) for topo in TYPE_LIST]
+
+    YEAR_CHOICE = []
+    for n in range(timezone.now().year, timezone.now().year - 30, -1):
+        YEAR_CHOICE.append((n, n))
+
+    title = models.CharField('titre', max_length=70, blank=True, null=True)
+    ref = models.CharField('référence', max_length=70, blank=True, null=True)
+    type = models.CharField('type', max_length=10, choices=TYPE_CHOICE, default='climbing', blank=True, null=True)
+    year_of_edition = models.IntegerField('année d\'édition', choices=YEAR_CHOICE, blank=True, null=True)
+    date_of_purchase = models.DateField('date d\'achat', blank=True, null=True)
+    cover = models.ImageField('couverture', upload_to='topos', blank=True, null=True)
+    status = models.BooleanField('disponible', help_text='décocher si perdu ou retiré', default=True, db_index=True)
+
+    def cover_html(self):
+        return mark_safe('<img src="/static/media/{}" width="64" />'.format(self.cover))
+    cover_html.short_description = 'Couverture'
+
+    def __str__(self):
+        return '{type} {title}'.format(type=self.get_type_display(), title=self.title)
+
+    class Meta:
+        verbose_name = 'topo'
+        verbose_name_plural = 'topos'
+
+
+class Borrowing(models.Model):
+    """Borrowing model linking an Equipment to a User"""
+
     user = models.ForeignKey(User, on_delete=models.PROTECT, verbose_name='par', blank=True, null=True)
     date = models.DateField('emprunté le', db_index=True)  # default=timezone.now
 
     class Meta:
-        verbose_name = 'emprunt'
-        verbose_name_plural = 'emprunts de matériel'
-        ordering = ('-date', '-id')
-
-    def __str__(self):
-        return 'Emprunt {item} par {user}'.format(item=self.item, user=self.user.first_name)
+        abstract = True
 
     @property
     def color(self):
@@ -178,3 +203,32 @@ class EquipmentBorrowing(models.Model):
         elif d < 21:
             color = 'danger'
         return color
+
+
+class EquipmentBorrowing(Borrowing):
+    """Borrowing relation between an Equipment and a User"""
+
+    item = models.ForeignKey(Equipment, on_delete=models.PROTECT, verbose_name='équipement')
+
+    class Meta:
+        verbose_name = 'emprunt'
+        verbose_name_plural = 'emprunts de matériel'
+        ordering = ('-date', '-id')
+
+    def __str__(self):
+        return 'Emprunt {item} par {user}'.format(item=self.item, user=self.user.first_name)
+
+
+class TopoBorrowing(Borrowing):
+    """Borrowing model linking a Topo or Map to a User"""
+
+    item = models.ForeignKey(Topo, on_delete=models.PROTECT, verbose_name='topo')
+
+    class Meta:
+        verbose_name = 'emprunt'
+        verbose_name_plural = 'emprunts de topo'
+        ordering = ('-date', '-id')
+
+    def __str__(self):
+        return 'Emprunt {item} par {user}'.format(item=self.item, user=self.user.first_name)
+
