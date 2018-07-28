@@ -12,8 +12,7 @@ from reportlab.lib.colors import lightgrey
 from reportlab.pdfbase import pdfmetrics
 from reportlab.pdfbase.ttfonts import TTFont
 
-from .models import Borrowing, Equipment
-
+from .models import Equipment, EquipmentBorrowing
 
 COLUMN_1 = 1.5 * cm
 COLUMN_2 = 6 * cm
@@ -83,7 +82,7 @@ class ExportMaterial:
         # Loop over equipment types
         for equipment in Equipment.TYPE_LIST:
 
-            borrowing_list = Borrowing.objects.filter(item__type=equipment.url)\
+            borrowing_list = EquipmentBorrowing.objects.filter(item__type=equipment.url)\
                 .order_by('item__ref', '-date', '-id').distinct('item__ref').exclude(item__status=False)
 
             self._entete_de_liste(equipment, y)

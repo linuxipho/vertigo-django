@@ -3,3 +3,4 @@ psycopg2
 django-phonenumber-field
 python-decouple
 reportlab
+gunicorn

@@ -88,10 +88,8 @@ WSGI_APPLICATION = 'vertigodjango.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql',
-        'HOST': config('DB_HOST', 'localhost'),
         'NAME': config('DB_NAME'),
         'USER': config('DB_USER'),
-        'PASSWORD': config('DB_PASSWORD'),
     }
 }
 
