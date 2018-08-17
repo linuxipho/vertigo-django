@@ -30,6 +30,8 @@ EMAIL_HOST_PASSWORD = password
 EMAIL_USE_TLS = True
 DEFAULT_FROM_EMAIL = John Doe <john@doe.com>
 EMAIL_SUBJECT_PREFIX = [Subject]
+STATIC_ROOT = /path/to/static
+DEBUG = False
 ```
 
 ## Import des adhérents

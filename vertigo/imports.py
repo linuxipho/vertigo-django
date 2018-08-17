@@ -9,7 +9,7 @@ class ImportUsers:
 
     def __init__(self, filename):
         self.file = filename
-        self.group, created = Group.objects.get_or_create(name='adherents')
+        self.group, self.created = Group.objects.get_or_create(name='adherents')
         self.created = 0
 
     # def load(self):

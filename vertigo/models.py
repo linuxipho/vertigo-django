@@ -98,10 +98,11 @@ class Equipment(models.Model):
     year_of_manufacture = models.IntegerField('date de fabrication', choices=YEAR_CHOICE, blank=True, null=True)
     date_of_purchase = models.DateField('date d\'achat', blank=True, null=True)
     date_of_first_use = models.DateField('date de première utilisation', blank=True, null=True)
+    purchase_store = models.CharField('magasin', max_length=50, blank=True)
 
     caution = models.CharField(
         'avertissement', help_text='un court text accolé au nom du matériel', max_length=50, blank=True)
-    comment = models.TextField('commentaire', max_length=3, blank=True)
+    comment = models.TextField('commentaire', max_length=250, blank=True)
 
     class Meta:
         verbose_name = 'équipement'
