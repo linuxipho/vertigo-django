@@ -85,8 +85,6 @@ def list_page(request, url_type):
 @permission_required(('vertigo.add_equipmentborrowing', 'vertigo.add_topoborrowing'))
 def borrowing_page(request, url_type, item_id):
 
-    context = {}
-
     # request.META.get('HTTP_REFERER')
     if url_type in [item.url for item in Equipment.TYPE_LIST]:
         object_type = [obj for obj in Equipment.TYPE_LIST if obj.url == url_type][0]
@@ -188,7 +186,7 @@ def import_page(request):
                 import_users = ImportUsers(request.FILES['file'])
                 created = import_users.run()
                 print("{} users created".format(created))
-                messages.success(request, "Le nouvel emprunt a bien été enregistré.")
+                messages.success(request, "{} adhérents on été ajoutés".format(created))
                 return HttpResponseRedirect('/admin/auth/user/')
 
         # else:
