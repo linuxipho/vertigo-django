@@ -27,6 +27,7 @@ ALLOWED_HOSTS = config('ALLOWED_HOSTS', cast=Csv())
 
 LOGIN_URL = 'login'
 LOGIN_REDIRECT_URL = 'default'
+LOGOUT_REDIRECT_URL = 'logout'
 SESSION_COOKIE_AGE = 1 * 3600  # auto disconnect after 1 hour
 
 MESSAGE_TAGS = {

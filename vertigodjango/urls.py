@@ -22,12 +22,13 @@ from vertigo.models import Equipment
 
 urlpatterns = [
     path('login/', auth_views.LoginView.as_view(template_name='login.html'), name='login'),
-    path('import/', views.import_page, name='import'),
+    path('admin/login/', auth_views.LoginView.as_view(template_name='login.html')),
     path('logout/', views.logout_page, name='logout'),
     path('admin/', admin.site.urls),
+    path('import/', views.import_page, name='import'),
     path('export/', views.export_pdf, name="export"),
-    path('<slug:url_type>/accord/', views.agreement_page, name='agreement_url'),
 
+    path('<slug:url_type>/accord/', views.agreement_page, name='agreement_url'),
     path('<slug:url_type>/', views.list_page, name='list_url'),
     path('<slug:url_type>/emprunt/id-<int:item_id>', views.borrowing_page, name='borrowing_url'),
 
