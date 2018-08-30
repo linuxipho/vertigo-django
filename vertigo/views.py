@@ -40,7 +40,7 @@ def send_email(user, item, gender):
                             jusqu'à son retour entre les mains du référent matériel <strong>jeudi prochain</strong>.</p>
                             <p>Bonne grimpe !</p>
                             <p>- - -<br />
-                            matos.vertigo-montpellier.fr</p>
+                            https://matos.vertigo-montpellier.fr</p>
                             <img src="cid:logo.png">
                             """.format(user=user.first_name, article=gender, item=item)
         msg = EmailMultiAlternatives(subject, text_content, from_email, to)
