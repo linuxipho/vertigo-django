@@ -1,21 +1,33 @@
 from django.contrib import admin
 from django.contrib.auth.admin import UserAdmin
 from django.contrib.auth.models import User
+from import_export import resources
+from import_export.admin import ExportMixin
 
 from .models import Profile, Equipment, Topo, EquipmentBorrowing, TopoBorrowing
 
 
 class ProfileInline(admin.StackedInline):
-
     model = Profile
     can_delete = False
     verbose_name_plural = 'Profile'
     fk_name = 'user'
 
 
-class CustomUserAdmin(UserAdmin):
+class UserResource(resources.ModelResource):
 
-    inlines = (ProfileInline, )
+    queryset = User.objects.exclude(is_active=False)
+
+    class Meta:
+        model = User
+        fields = ('first_name', 'last_name', 'email')
+
+
+class CustomUserAdmin(ExportMixin, UserAdmin):
+
+    resource_class = UserResource
+
+    inlines = (ProfileInline,)
     list_display = ('first_name', 'last_name', 'get_phone', 'email', 'get_medical_date')
     list_select_related = ('profile',)
 
@@ -71,4 +83,3 @@ admin.site.register(Equipment, EquipmentAdmin)
 admin.site.register(Topo, TopoAdmin)
 admin.site.register(EquipmentBorrowing, EquipmentBorrowingAdmin)
 admin.site.register(TopoBorrowing, TopoBorrowingAdmin)
-

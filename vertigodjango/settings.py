@@ -49,6 +49,7 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'vertigo.apps.VertigoConfig',
     'phonenumber_field',
+    'import_export',
 ]
 
 MIDDLEWARE = [
@@ -132,11 +133,11 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/2.0/howto/static-files/
 
 STATIC_URL = '/static/'
-STATIC_ROOT = config('STATIC_ROOT', os.path.join(BASE_DIR, "../www/static"))
+STATIC_ROOT = config('STATIC_ROOT', 'static')  # prod -> os.path.join(BASE_DIR, "../www/static")
 
-STATICFILES_DIRS = [
-    os.path.join(BASE_DIR, "static"),
-]
+# STATICFILES_DIRS = [
+#     os.path.join(BASE_DIR, "static"),
+# ]
 
 # Email config
 SEND_EMAIL = config('SEND_EMAIL', default=False, cast=bool)

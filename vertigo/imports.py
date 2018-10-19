@@ -1,63 +1,70 @@
-from django.db.models import Q
-from django.utils.dateparse import parse_date
+from datetime import datetime
+import csv
+import pytz
+
 from django.contrib.auth.models import User
 from django.contrib.auth.models import Group
-import csv
+from django.utils.timezone import make_aware
 
 
 class ImportUsers:
 
     def __init__(self, filename):
         self.file = filename
-        self.group, self.created = Group.objects.get_or_create(name='adherents')
         self.created = 0
-
-    # def load(self):
-    #     with open(self.filename, 'wb+') as destination:
-    #         for chunk in f.chunks():
-    #             destination.write(chunk)
+        self.members = 0
 
     def run(self):
 
+        # On ouvre le csv provenant de l'intranet FFCAM
         with open(self.file.name, encoding='latin-1') as f:
 
             reader = csv.DictReader(f, delimiter='\t')
+            group = Group.objects.get(name='adherents')
 
-            for line in reader:  # phone
+            # On boucle sur chaque ligne
+            for line in reader:
 
+                # On récupère les colonnes
                 prenom = line['PRENOM']
                 nom = line['NOM']
                 email = line['MEL'].lower()
                 ffcam = line['ID']
+                # phone = line['POR']
                 naissance = ''.join(reversed(line['DATNAISS'].split('-')))
                 date_adh_fede = line['DATADHFEDE']
-                is_current_member = True if line['RC'] else False
+                has_paid = True if line['RC'] else False
 
-                try:
-                    user = User.objects.get(Q(profile__license=ffcam) | Q(username=email))
+                # On récupère l'utilisateur s'il existe, sinon on le créé
+                user, created = User.objects.get_or_create(username=ffcam)
 
-                    if user.date_joined.date() < parse_date(date_adh_fede):
-                        user.is_active = is_current_member
-                        user.is_staff = True if is_current_member else False
-                        user.profile.license = ffcam
-                        user.date_joined = parse_date(date_adh_fede)
-                        user.email = email
-                        user.save()
-
-                except User.DoesNotExist:
-                    user = User.objects.create_user(username=email, first_name=prenom, last_name=nom, email=email)
+                # Si c'est une création
+                if created:
+                    # Créé le mot de base et le groupe
                     user.set_password(naissance)
-                    user.groups.add(self.group)
-                    user.is_active = is_current_member
-                    user.is_staff = True if is_current_member else False
-                    user.date_joined = parse_date(date_adh_fede)
+                    user.groups.add(group)
+                    # Ajoute la date d'adhésion
+                    joined_date = datetime.strptime(date_adh_fede, '%Y-%m-%d')
+                    user.date_joined = make_aware(joined_date, pytz.timezone("Europe/Paris"))
                     user.profile.license = ffcam
-                    user.save()
+                    user.first_name = prenom
+                    user.last_name = nom
+                    user.email = email
                     self.created += 1
+                    print("{license} {user} créé".format(user=user, license=user.profile.license))
 
-        # Set superuser
-        superuser = User.objects.get(profile__license='340120179003')
-        superuser.is_superuser = True
-        superuser.save()
+                # Active ou pas le membre
+                if has_paid:
+                    user.is_active = True
+                    user.is_staff = True
+                    self.members += 1
+                else:
+                    user.is_active = False
+                    user.is_staff = False
+
+                # On sauve l'utilisateur
+                user.save()
+
+            print("Il y a {} adhérents dont {} qui viennent d'être rajoutés".format(self.members, self.created))
 
         return self.created

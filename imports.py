@@ -1,57 +1,78 @@
 #!/usr/bin/env python
-import django
-from django.db.models import Q
-from django.utils.dateparse import parse_date
 
+import os
+import csv
+import django
+import pytz
+from datetime import datetime
+
+os.environ.setdefault("DJANGO_SETTINGS_MODULE", "vertigodjango.settings")
 django.setup()
 
 from django.contrib.auth.models import User
 from django.contrib.auth.models import Group
-
-import csv
+from django.utils.timezone import make_aware
 
 
 GROUP, created = Group.objects.get_or_create(name='adherents')
 
 
+# On ouvre le csv provenant de l'intranet FFCAM
 with open('export.txt', encoding='latin-1') as f:
 
     reader = csv.DictReader(f, delimiter='\t')
 
-    for line in reader:  # phone
+    new_people = 0
+    members = 0
 
+    # On boucle sur chaque ligne
+    for line in reader:
+
+        # On récupère les colonnes
         prenom = line['PRENOM']
         nom = line['NOM']
         email = line['MEL'].lower()
         ffcam = line['ID']
+        phone = line['POR']
         naissance = ''.join(reversed(line['DATNAISS'].split('-')))
         date_adh_fede = line['DATADHFEDE']
-        is_current_member = True if line['RC'] else False
+        has_paid = True if line['RC'] else False
 
-        try:
-            user = User.objects.get(Q(profile__license=ffcam) | Q(username=email))
+        # On récupère l'utilisateur s'il existe, sinon on le créé
+        user, created = User.objects.get_or_create(username=ffcam)
 
-            if user.date_joined.date() < parse_date(date_adh_fede):
-                print("Updating " + user.__str__())
-                user.is_active = is_current_member
-                user.is_staff = True if is_current_member else False
-                user.profile.license = ffcam
-                user.date_joined = parse_date(date_adh_fede)
-                user.email = email
-                user.save()
-
-        except User.DoesNotExist as e:
-            user = User.objects.create_user(username=email, first_name=prenom, last_name=nom, email=email)
+        # Si c'est une création
+        if created:
+            # Créé le mot de base et le groupe
             user.set_password(naissance)
             user.groups.add(GROUP)
-            user.is_active = is_current_member
-            user.is_staff = True if is_current_member else False
-            user.date_joined = parse_date(date_adh_fede)
+            # Ajoute la date d'adhésion
+            joined_date = datetime.strptime(date_adh_fede, '%Y-%m-%d')
+            user.date_joined = make_aware(joined_date, pytz.timezone("Europe/Paris"))
             user.profile.license = ffcam
-            user.save()
-            print("User {} created :".format(user))
+            user.first_name = prenom
+            user.last_name = nom
+            user.email = email
+            new_people += 1
+            print("{license} {user} créé".format(user=user, license=user.profile.license))
+
+        # Active ou pas le membre
+        if has_paid:
+            user.is_active = True
+            user.is_staff = True
+            members += 1
+        else:
+            user.is_active = False
+            user.is_staff = False
+
+        # On sauve l'utilisateur
+        user.save()
+
+    print("Il y a {} adhérents dont {} qui viennent d'être rajoutés".format(members, new_people))
 
 # Set superuser
-superuser = User.objects.get(profile__license='340120179003')
+superuser = User.objects.get(profile__license='340120179003')  # Me !
 superuser.is_superuser = True
+superuser.is_staff = True
+superuser.is_active = True
 superuser.save()

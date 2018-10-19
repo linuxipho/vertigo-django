@@ -153,7 +153,9 @@ class Topo(models.Model):
 
     TOPO = EquipmentType('topo', 'topos', 'le')
     MAP = EquipmentType('carte', 'cartes', 'la')
-    TYPE_LIST = [TOPO, MAP]
+    GUIDE = EquipmentType('guide rando', 'guides', 'le')
+    DVD = EquipmentType('livre/DVD', 'livres/DVDs', 'le')
+    TYPE_LIST = [TOPO, MAP, GUIDE, DVD]
 
     TYPE_CHOICE = [(topo.url, topo.singular) for topo in TYPE_LIST]
 
@@ -184,7 +186,7 @@ class Topo(models.Model):
 class Borrowing(models.Model):
     """Borrowing model linking an Equipment to a User"""
 
-    user = models.ForeignKey(User, on_delete=models.PROTECT, verbose_name='par', blank=True, null=True)
+    manager = models.ForeignKey(User, on_delete=models.PROTECT, verbose_name='responsable matos', blank=True, null=True)
     date = models.DateField('emprunté le', db_index=True)  # default=timezone.now
 
     class Meta:
@@ -209,10 +211,12 @@ class Borrowing(models.Model):
 class EquipmentBorrowing(Borrowing):
     """Borrowing relation between an Equipment and a User"""
 
+    user = models.ForeignKey(User, on_delete=models.PROTECT,
+                             related_name='equipment_borrowers', verbose_name='par', blank=True, null=True)
     item = models.ForeignKey(Equipment, on_delete=models.PROTECT, verbose_name='équipement')
 
     class Meta:
-        verbose_name = 'emprunt'
+        verbose_name = 'emprunt de matériel'
         verbose_name_plural = 'emprunts de matériel'
         ordering = ('-date', '-id')
 
@@ -223,10 +227,12 @@ class EquipmentBorrowing(Borrowing):
 class TopoBorrowing(Borrowing):
     """Borrowing model linking a Topo or Map to a User"""
 
+    user = models.ForeignKey(User, on_delete=models.PROTECT,
+                             related_name='topo_borrowers', verbose_name='par', blank=True, null=True)
     item = models.ForeignKey(Topo, on_delete=models.PROTECT, verbose_name='topo')
 
     class Meta:
-        verbose_name = 'emprunt'
+        verbose_name = 'emprunt de topo'
         verbose_name_plural = 'emprunts de topo'
         ordering = ('-date', '-id')
 

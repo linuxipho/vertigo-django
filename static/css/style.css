@@ -42,3 +42,9 @@
   border-top-left-radius: 0;
   border-top-right-radius: 0;
 }
+
+.center {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+}

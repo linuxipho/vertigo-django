@@ -18,31 +18,32 @@ from .exports import ExportMaterial
 from .imports import ImportUsers
 
 
-def send_email(user, item, gender):
+def send_email(user, item, gender, manage_user):
     """Methode called to send email to new borrower
     :param user: the User class instance
     :param item: the Equipment class instance
     :param gender: the current equipment gender
+    :param manage_user: the User who is logged in
     """
     if settings.SEND_EMAIL:  # and not request.user.is_authenticated:
         subject = "{prefix} Emprunt {item}".format(prefix=settings.EMAIL_SUBJECT_PREFIX, item=item)
         from_email = settings.DEFAULT_FROM_EMAIL
         to = [user.email]
         text_content = """
-                            Salut {user}, tu as emprunté {article} {item}.
+                            Salut {user}, tu as emprunté {article} {item} (déclaré par {manager}).
                             Tu en es responsable pendant une semaine, jusqu'à son retour
                             entre les mains du référent matériel jeudi prochain.
-                            """.format(user=user.first_name, article=gender, item=item)
+                            """.format(user=user.first_name, article=gender, item=item, manager=manage_user.first_name)
         html_content = """
                             <p>Salut {user},</p>
-                            <p>Tu as emprunté {article} <strong>{item}</strong>.<br \>
+                            <p>Tu as emprunté {article} <strong>{item}</strong> (déclaré par {manager}).<br \>
                             Tu en es responsable pendant une semaine,
                             jusqu'à son retour entre les mains du référent matériel <strong>jeudi prochain</strong>.</p>
                             <p>Bonne grimpe !</p>
                             <p>- - -<br />
                             matos.vertigo-montpellier.fr</p>
                             <img src="cid:logo.png">
-                            """.format(user=user.first_name, article=gender, item=item)
+                            """.format(user=user.first_name, article=gender, item=item, manager=manage_user.first_name)
         msg = EmailMultiAlternatives(subject, text_content, from_email, to)
         msg.attach_alternative(html_content, "text/html")
         msg.mixed_subtype = 'related'
@@ -111,7 +112,7 @@ def borrowing_page(request, url_type, item_id):
                 else:
                     TopoBorrowing.objects.create(item=current_obj, user=user, date=date)
 
-                send_email(user, current_obj, object_type.gender)
+                send_email(user, current_obj, object_type.gender, request.user)
                 messages.success(request, "Le nouvel emprunt a bien été enregistré.")
 
                 return redirect('list_url', url_type=url_type)
