@@ -135,9 +135,9 @@ USE_TZ = True
 STATIC_URL = '/static/'
 STATIC_ROOT = config('STATIC_ROOT', 'static')  # prod -> os.path.join(BASE_DIR, "../www/static")
 
-# STATICFILES_DIRS = [
-#     os.path.join(BASE_DIR, "static"),
-# ]
+STATICFILES_DIRS = [
+    os.path.join(BASE_DIR, "static"),
+]
 
 # Email config
 SEND_EMAIL = config('SEND_EMAIL', default=False, cast=bool)
