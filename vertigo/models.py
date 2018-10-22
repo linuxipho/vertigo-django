@@ -24,6 +24,7 @@ def override_user_str(self):
 
 
 User.add_to_class('__str__', override_user_str)
+User._meta.__setattr__('ordering', ('first_name', ))
 
 
 class Profile(models.Model):

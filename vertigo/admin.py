@@ -16,8 +16,6 @@ class ProfileInline(admin.StackedInline):
 
 class UserResource(resources.ModelResource):
 
-    queryset = User.objects.exclude(is_active=False)
-
     class Meta:
         model = User
         fields = ('first_name', 'last_name', 'email')
@@ -30,6 +28,8 @@ class CustomUserAdmin(ExportMixin, UserAdmin):
     inlines = (ProfileInline,)
     list_display = ('first_name', 'last_name', 'get_phone', 'email', 'get_medical_date')
     list_select_related = ('profile',)
+    list_filter = ('is_active',)
+    ordering = ('first_name',)
 
     def get_medical_date(self, instance):
         return instance.profile.medical_date
