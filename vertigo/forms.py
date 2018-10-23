@@ -3,7 +3,6 @@ from django.forms import ModelForm
 from django.utils import timezone
 
 from vertigo.models import EquipmentBorrowing, TopoBorrowing
-from django.contrib.auth.models import User
 
 
 class BorrowingForm(ModelForm):

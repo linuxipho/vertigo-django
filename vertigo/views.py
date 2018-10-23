@@ -165,7 +165,7 @@ def logout_page(request):
             request, mark_safe("A bientôt <span class=\"font-weight-bold\">{}</span> ! Tu as bien été déconnecté."
                                .format(request.user.first_name)))
         logout(request)
-    return render(request, 'login.html')
+    return render(request, 'registration/login.html')
 
 
 def export_pdf(request):

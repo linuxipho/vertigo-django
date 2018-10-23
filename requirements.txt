@@ -6,3 +6,4 @@ reportlab
 gunicorn
 pytz
 django-import-export
+django[argon2]

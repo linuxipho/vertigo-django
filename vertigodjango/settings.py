@@ -25,8 +25,8 @@ DEBUG = config('DEBUG', default=True, cast=bool)
 
 ALLOWED_HOSTS = config('ALLOWED_HOSTS', cast=Csv())
 
-LOGIN_URL = 'login'
-LOGIN_REDIRECT_URL = 'default'
+LOGIN_URL = '/login'
+LOGIN_REDIRECT_URL = '/cordes'
 LOGOUT_REDIRECT_URL = 'logout'
 SESSION_COOKIE_AGE = 1 * 3600  # auto disconnect after 1 hour
 
@@ -60,6 +60,11 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+]
+
+PASSWORD_HASHERS = [
+    'django.contrib.auth.hashers.Argon2PasswordHasher',
+    'django.contrib.auth.hashers.PBKDF2PasswordHasher',
 ]
 
 ROOT_URLCONF = 'vertigodjango.urls'
@@ -133,7 +138,7 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/2.0/howto/static-files/
 
 STATIC_URL = '/static/'
-STATIC_ROOT = config('STATIC_ROOT', 'static')  # prod -> os.path.join(BASE_DIR, "../www/static")
+# STATIC_ROOT = config('STATIC_ROOT', 'static')  # prod -> os.path.join(BASE_DIR, "../www/static")
 
 STATICFILES_DIRS = [
     os.path.join(BASE_DIR, "static"),
