@@ -26,9 +26,9 @@ DEBUG = config('DEBUG', default=True, cast=bool)
 ALLOWED_HOSTS = config('ALLOWED_HOSTS', cast=Csv())
 
 LOGIN_URL = '/login'
-LOGIN_REDIRECT_URL = '/cordes'
+LOGIN_REDIRECT_URL = 'default'
 LOGOUT_REDIRECT_URL = 'logout'
-SESSION_COOKIE_AGE = 1 * 3600  # auto disconnect after 1 hour
+SESSION_COOKIE_AGE = 6 * 3600  # auto disconnect after 6 hour
 
 MESSAGE_TAGS = {
     messages.DEBUG: 'alert-info',

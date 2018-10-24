@@ -26,7 +26,7 @@ class CustomUserAdmin(ExportMixin, UserAdmin):
     resource_class = UserResource
 
     inlines = (ProfileInline,)
-    list_display = ('first_name', 'last_name', 'get_phone', 'email', 'get_medical_date')
+    list_display = ('first_name', 'last_name', 'get_phone', 'email', 'is_active')  # 'get_medical_date'
     list_select_related = ('profile',)
     list_filter = ('is_active',)
     ordering = ('first_name',)

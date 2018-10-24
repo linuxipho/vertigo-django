@@ -1,10 +1,12 @@
 #!/usr/bin/env python
-
 import os
 import csv
 import django
+import phonenumbers
 import pytz
 from datetime import datetime
+
+from django.core.exceptions import ValidationError
 
 os.environ.setdefault("DJANGO_SETTINGS_MODULE", "vertigodjango.settings")
 django.setup()
@@ -12,18 +14,31 @@ django.setup()
 from django.contrib.auth.models import User
 from django.contrib.auth.models import Group
 from django.utils.timezone import make_aware
+from django.core.validators import validate_email
 
 
 GROUP, created = Group.objects.get_or_create(name='adherents')
+
+
+def create_user(login, full=True):
+    new_user = User.objects.create(username=login)
+    new_user.profile.license = ffcam
+    new_user.profile.phone = phone
+    new_user.set_password(naissance)
+    new_user.groups.add(GROUP)
+    new_user.first_name = prenom
+    new_user.last_name = nom
+    if full:
+        new_user.email = login
+    new_user.date_joined = joined_date
+
+    return new_user
 
 
 # On ouvre le csv provenant de l'intranet FFCAM
 with open('export.txt', encoding='latin-1') as f:
 
     reader = csv.DictReader(f, delimiter='\t')
-
-    new_people = 0
-    members = 0
 
     # On boucle sur chaque ligne
     for line in reader:
@@ -33,42 +48,46 @@ with open('export.txt', encoding='latin-1') as f:
         nom = line['NOM']
         email = line['MEL'].lower()
         ffcam = line['ID']
-        phone = line['POR']
+        phone = phonenumbers.parse(line['POR'], "FR") if len(line['POR']) >= 9 else None
         naissance = ''.join(reversed(line['DATNAISS'].split('-')))
         date_adh_fede = line['DATADHFEDE']
         has_paid = True if line['RC'] else False
+        joined_date = make_aware(datetime.strptime(date_adh_fede, '%Y-%m-%d'), pytz.timezone("Europe/Paris"))
 
-        # On récupère l'utilisateur s'il existe, sinon on le créé
-        user, created = User.objects.get_or_create(username=ffcam)
+        print("Itération --> " + nom)
 
-        # Si c'est une création
-        if created:
-            # Créé le mot de base et le groupe
-            user.set_password(naissance)
-            user.groups.add(GROUP)
-            # Ajoute la date d'adhésion
-            joined_date = datetime.strptime(date_adh_fede, '%Y-%m-%d')
-            user.date_joined = make_aware(joined_date, pytz.timezone("Europe/Paris"))
+        try:
+            # Sélectionne l'adhérent en fonction de son numéro de licence
+            user = User.objects.get(profile__license=ffcam)
+            print("User with license {} exists".format(ffcam))
+
+        except User.DoesNotExist:
+            print("User with license {} does not exists".format(ffcam))
+
+            try:
+                validate_email(email)
+                user = User.objects.get(email=email)
+                print("User with email {} exists".format(email))
+
+            except User.DoesNotExist:
+                print("Creating new user")
+                user = create_user(email)
+
+            except ValidationError:
+                user = create_user(ffcam, False)
+
+        # Met à jour ne numéro de licence
+        if user.date_joined < joined_date:
+            print("Update profile with new license number")
+            user.date_joined = joined_date
             user.profile.license = ffcam
-            user.first_name = prenom
-            user.last_name = nom
-            user.email = email
-            new_people += 1
-            print("{license} {user} créé".format(user=user, license=user.profile.license))
 
         # Active ou pas le membre
-        if has_paid:
-            user.is_active = True
-            user.is_staff = True
-            members += 1
-        else:
-            user.is_active = False
-            user.is_staff = False
+        user.is_active = has_paid
+        user.is_staff = has_paid
 
         # On sauve l'utilisateur
         user.save()
-
-    print("Il y a {} adhérents dont {} qui viennent d'être rajoutés".format(members, new_people))
 
 # Set superuser
 superuser = User.objects.get(profile__license='340120179003')  # Me !
