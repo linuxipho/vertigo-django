@@ -1,3 +1,4 @@
+phonenumbers
 Django
 psycopg2-binary
 django-phonenumber-field
