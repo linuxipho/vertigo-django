@@ -51,7 +51,7 @@
         <input type="text" id="id_username" name="username" class="form-control" placeholder="Identifiant" required>
         <label for="id_password" class="sr-only">Mot de passe</label>
         <input type="password" id="id_password" name="password" class="form-control" aria-describedby="resetPassword" placeholder="Mot de passe" required>
-        <small id="resetPassword" class="form-text text-muted"><a href="{{ request.scheme }}://{{ request.get_host }}{% url 'password_reset' %}">Mot de passe oublié</a></small>
+        <small id="resetPassword" class="form-text text-muted"><a href="{% url 'password_reset' %}">Mot de passe oublié</a></small>
         <button class="btn btn-lg btn-danger btn-block mt-4 red-vertigo" type="submit">Connexion</button>
     </form>
 
